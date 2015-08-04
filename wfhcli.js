@@ -1,4 +1,4 @@
-var Table = require('cli-table');
+var Table = require('cli-table2');
 var parseArgs = require('minimist');
 var request = require('request');
 var moment = require('moment');
@@ -20,9 +20,13 @@ var categories = function(site) {
   });
 }
 
-var companies = function(site) {
+var companies = function(site, page) {
   var table = getTable(['ID', 'Name']);
   url = site + '/api/companies.json';
+
+  if (page != undefined) {
+    url = url + '?page=' + page;
+  }
 
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -35,12 +39,15 @@ var companies = function(site) {
   });
 }
 
-var jobs = function (site, category) {
-  var table = getTable(['ID', 'Date', 'Title', 'Company', 'Category'])
-
+var jobs = function (site, category, page) {
+  var table = getTable(['ID', 'Date', 'Title', 'Company', 'Country', 'Category'])
   var url = site + '/api/jobs.json';
+
   if (category != undefined) {
-    var url = site + '/api/categories/' + category + '/jobs.json';
+    url = site + '/api/categories/' + category + '/jobs.json';
+    if (page != undefined) {
+      url = url + '?page=' + page;
+    }
   }
 
   request(url, function (error, response, body) {
@@ -48,7 +55,12 @@ var jobs = function (site, category) {
       var json = JSON.parse(body);
       for (i=0; i<json.length; i++) {
         var date = moment(json[i].created_at).format('YYYY-MM-DD');
-        table.push([json[i].id, date, json[i].title, json[i].company.name, json[i].category.name]);
+        table.push([json[i].id,
+                   date,
+                   json[i].title,
+                   json[i].company.name,
+                   getCountry(json[i].country),
+                   json[i].category.name]);
       }
       console.log(table.toString());
     }
@@ -56,17 +68,20 @@ var jobs = function (site, category) {
 }
 
 var job = function (site, job) {
-  var table = new Table();
+  var table = new Table({colWidths:[20,80], wordWrap:true});
   var url = site + '/api/jobs/' + job + '.json';
 
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       var json = JSON.parse(body);
       table.push(
-        { 'ID': json.id },
         { 'Title': json.title },
-        { 'Description': json.description },
-        { 'Application Info': json.appliation_info }
+        { 'Category': json.category.name },
+        { 'Posted': json.created_at },
+        { 'Description': json.description.replace(/\cM/g, '\n') },
+        { 'Application Info': json.application_info.replace(/\cM/g, '\n') },
+        { 'Country': getCountry(json.country) },
+        { 'Location': json.location }
       );
       console.log(table.toString());
     }
@@ -82,6 +97,14 @@ var getTable = function(header) {
   return table;
 }
 
+var getCountry = function(country) {
+  if (country != undefined) {
+    return country.name;
+  } else {
+    return 'Anywhere';
+  }
+}
+
 var argv = require('minimist')(process.argv.slice(2));
 
 switch(argv._[0]) {
@@ -89,10 +112,10 @@ switch(argv._[0]) {
     categories(site);
     break;
   case 'companies':
-    companies(site);
+    companies(site, argv.page);
     break;
   case 'jobs':
-    jobs(site, argv.category);
+    jobs(site, argv.category, argv.page);
     break;
   case 'job':
     job(site, argv._[1]);
