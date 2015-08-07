@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 var Table = require('cli-table2');
 var parseArgs = require('minimist');
 var request = require('request');
@@ -39,6 +41,24 @@ var companies = function(site, page) {
   });
 }
 
+var company = function (site, company) {
+  var table = new Table({colWidths:[20,80], wordWrap:true});
+  var url = site + '/api/companies/' + company + '.json';
+
+  request(url, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      var json = JSON.parse(body);
+      table.push(
+        { 'Name': json.name },
+        { 'URL': json.url },
+        { 'Headquarters': json.country.name },
+        { 'Twitter': json.twitter }
+      );
+      console.log(table.toString());
+    }
+  });
+}
+
 var jobs = function (site, category, page) {
   var table = getTable(['ID', 'Date', 'Title', 'Company', 'Country', 'Category'])
   var url = site + '/api/jobs.json';
@@ -75,7 +95,7 @@ var job = function (site, job) {
     if (!error && response.statusCode == 200) {
       var json = JSON.parse(body);
       table.push(
-        { 'Title': json.title },
+        { 'Title': json.title + ' @ ' + json.company.name },
         { 'Category': json.category.name },
         { 'Posted': json.created_at },
         { 'Description': json.description.replace(/\cM/g, '\n') },
@@ -114,10 +134,15 @@ switch(argv._[0]) {
   case 'companies':
     companies(site, argv.page);
     break;
+  case 'company':
+    company(site, argv._[1]);
+    break;
   case 'jobs':
     jobs(site, argv.category, argv.page);
     break;
   case 'job':
     job(site, argv._[1]);
     break;
+  default:
+    console.log('oops')
 }
