@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 var Table = require('cli-table2');
-var parseArgs = require('minimist');
-var request = require('request');
+var program = require('commander');
 var moment = require('moment');
+var request = require('request');
 
 site = 'https://www.wfh.io';
 
@@ -125,24 +125,48 @@ var getCountry = function(country) {
   }
 }
 
-var argv = require('minimist')(process.argv.slice(2));
+program
+  .version('0.0.3');
 
-switch(argv._[0]) {
-  case 'categories':
-    categories(site);
-    break;
-  case 'companies':
-    companies(site, argv.page);
-    break;
-  case 'company':
-    company(site, argv._[1]);
-    break;
-  case 'jobs':
-    jobs(site, argv.category, argv.page);
-    break;
-  case 'job':
-    job(site, argv._[1]);
-    break;
-  default:
-    console.log('oops')
-}
+program
+  .command('categories')
+  .description('Display job categories')
+  .action(function(){
+    categories(site)
+  });
+
+program
+  .command('company [id]')
+  .description('Display company with id')
+  .action(function(id){
+    company(site, id)
+  });
+
+program
+  .command('companies')
+  .description('Display companies')
+  .option("-p, --page [id]", "Specify page to request")
+  .action(function(options){
+    var page = options.page || 1;
+    companies(site, page)
+  });
+
+program
+  .command('job [id]')
+  .description('Display job with id')
+  .action(function(id){
+    job(site, id)
+  });
+
+program
+  .command('jobs')
+  .description('Display jobs')
+  .option("-c, --category [id]", "Limit results by category")
+  .option("-p, --page [id]", "Specify page to request")
+  .action(function(options){
+    var category = options.category_id || undefined;
+    var page = options.page || 1;
+    jobs(site, category, page)
+  });
+
+program.parse(process.argv);
