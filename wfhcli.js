@@ -4,8 +4,26 @@ var Table = require('cli-table2');
 var program = require('commander');
 var moment = require('moment');
 var request = require('request');
+var marked = require('marked');
+var TerminalRenderer = require('marked-terminal');
 
 var site = 'https://www.wfh.io';
+
+marked.setOptions({
+  // Define custom renderer
+  renderer: new TerminalRenderer()
+});
+
+var displayId = function(id) {
+  return '(' + id + ')';
+};
+
+var getCountry = function(country) {
+  if (country != undefined) {
+    return country.name;
+  }
+  return 'Anywhere';
+};
 
 var getTable = function(header) {
   var table = new Table({
@@ -16,135 +34,96 @@ var getTable = function(header) {
   return table;
 };
 
-var getCountry = function(country) {
-  if (country != undefined) {
-    return country.name;
-  }
-  return 'Anywhere';
+var getUrl = function(uri) {
+  return site + uri;
 };
 
-var displayId = function(id) {
-  return '(' + id + ')';
+var makeRequest = function(site, uri, callback) {
+  request(getUrl(uri), function(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      callback(body)
+    }
+  })
 };
 
-var categories = function(site) {
+var showCategories = function(body) {
   var table = getTable(['ID', 'Name']);
-  url = site + '/api/categories.json';
+  var json = JSON.parse(body);
 
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      for (i=0; i<json.length; i++) {
-        table.push([json[i].id, json[i].name])
-      }
-      console.log(table.toString())
-    }
-  })
-}
-
-var companies = function(site, page) {
-  var table = getTable(['ID', 'Name']);
-  url = site + '/api/companies.json';
-
-  if (page != undefined) {
-    url = url + '?page=' + page;
+  for (i=0; i<json.length; i++) {
+    table.push([json[i].id, json[i].name])
   }
-
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      for (i=0; i<json.length; i++) {
-        table.push([json[i].id, json[i].name])
-      }
-      console.log(table.toString())
-    }
-  })
+  console.log(table.toString())
 }
 
-var company = function(site, company) {
+var showCompanies = function(body) {
+  var table = getTable(['ID', 'Name']);
+  var json = JSON.parse(body);
+
+  for (i=0; i<json.length; i++) {
+    table.push([json[i].id, json[i].name])
+  }
+  console.log(table.toString())
+}
+
+var showCompany = function(body) {
   var table = new Table({colWidths:[20,80], wordWrap:true});
-  var url = site + '/api/companies/' + company + '.json';
+  var json = JSON.parse(body);
 
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      table.push(
-        { 'Name': json.name },
-        { 'URL': json.url },
-        { 'Headquarters': json.country.name },
-        { 'Twitter': json.twitter }
-      )
-      console.log(table.toString())
-    }
-  })
+  table.push(
+    { 'Name': json.name },
+    { 'URL': json.url },
+    { 'Headquarters': json.country.name },
+    { 'Twitter': json.twitter }
+  )
+  console.log(table.toString())
 }
 
-var jobs = function(site, category, page, source) {
+var showJobs = function(body) {
   var table = getTable(['ID', 'Posted', 'Category', 'Company', 'Title', 'Country']);
-  var url = site + '/api/jobs.json?page=' + page;
+  var json = JSON.parse(body);
 
-  if (category != undefined) {
-    url = url + '&category_id=' + category;
+  for (i=0; i<json.length; i++) {
+    var date = moment(json[i].created_at).format('YYYY-MM-DD');
+    table.push([json[i].id,
+               date,
+               json[i].category.name + ' ' + displayId(json[i].category.id),
+               json[i].company.name + ' ' + displayId(json[i].company.id),
+               json[i].title,
+               getCountry(json[i].country)])
   }
 
-  if (source != undefined) {
-    url = url + '&source_id=' + source;
-  }
-
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      for (i=0; i<json.length; i++) {
-        var date = moment(json[i].created_at).format('YYYY-MM-DD');
-        table.push([json[i].id,
-                   date,
-                   json[i].category.name + ' ' + displayId(json[i].category.id),
-                   json[i].company.name + ' ' + displayId(json[i].company.id),
-                   json[i].title,
-                   getCountry(json[i].country)])
-      }
-      console.log(table.toString())
-    }
-  })
+  console.log(table.toString())
 }
 
-var job = function(site, job) {
+var showJob = function(body) {
   var table = new Table({colWidths:[20,80], wordWrap:true});
-  var url = site + '/api/jobs/' + job + '.json';
+  var json = JSON.parse(body);
+  var date = moment(json.created_at).format('YYYY-MM-DD HH:mm');
 
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      table.push(
-        { 'Title': json.title + ' @ ' + json.company.name + ' ' + displayId(json.company.id) },
-        { 'Category': json.category.name + ' ' + displayId(json.category.id) },
-        { 'Posted': json.created_at },
-        { 'Description': json.description.replace(/\cM/g, '\n') },
-        { 'Application Info': json.application_info.replace(/\cM/g, '\n') },
-        { 'Country': getCountry(json.country) }
-      )
-      if (json.location != "") {
-        table.push({ 'Location': json.location })
-      }
-      table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) })
-      console.log(table.toString())
-    }
-  })
+  table.push(
+    { 'Title': json.title + ' @ ' + json.company.name + ' ' + displayId(json.company.id) },
+    { 'Category': json.category.name + ' ' + displayId(json.category.id) },
+    { 'Posted': date },
+    { 'Description': marked(json.description) },
+    { 'Application Info': marked(json.application_info) },
+    { 'Country': getCountry(json.country) }
+  )
+  if (json.location != "") {
+    table.push({ 'Location': json.location })
+  }
+  table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) })
+  console.log(table.toString())
 }
 
-var sources = function(site) {
+var showSources = function(body) {
   var table = getTable(['ID', 'Name', 'URL']);
-  var url = site + '/api/sources.json';
+  var json = JSON.parse(body);
 
-  request(url, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var json = JSON.parse(body);
-      for (i=0; i<json.length; i++) {
-        table.push([json[i].id, json[i].name, json[i].url])
-      }
-      console.log(table.toString())
-    }
-  })
+  for (i=0; i<json.length; i++) {
+    table.push([json[i].id, json[i].name, json[i].url])
+  }
+  console.log(table.toString())
 };
 
 program
@@ -154,14 +133,14 @@ program
   .command('categories')
   .description('Display job categories')
   .action(function(){
-    categories(site)
+    makeRequest(site, '/api/categories.json', showCategories)
   })
 
 program
   .command('company [id]')
   .description('Display company with id')
   .action(function(id){
-    company(site, id)
+    makeRequest(site, '/api/companies/' + id + '.json', showCompany)
   })
 
 program
@@ -170,14 +149,14 @@ program
   .option("-p, --page [id]", "Specify page to request")
   .action(function(options){
     var page = options.page || 1;
-    companies(site, page)
+    makeRequest(site, '/api/companies.json?page=' + page, showCompanies)
   })
 
 program
   .command('job [id]')
   .description('Display job with id')
   .action(function(id){
-    job(site, id)
+    makeRequest(site, '/api/jobs/' + id + '.json', showJob)
   })
 
 program
@@ -190,14 +169,24 @@ program
     var category = options.category || undefined;
     var page = options.page || 1;
     var source = options.source || undefined;
-    jobs(site, category, page, source)
+    var uri = '/api/jobs.json?page=' + page;
+
+    if (category != undefined) {
+      uri = uri + '&category_id=' + category;
+    }
+
+    if (source != undefined) {
+      uri = uri + '&source_id=' + source;
+    }
+
+    makeRequest(site, uri, showJobs)
   })
 
 program
   .command('sources')
   .description('Display job sources')
   .action(function() {
-    sources(site)
+    makeRequest(site, '/api/sources.json', showSources)
   })
 
 program
