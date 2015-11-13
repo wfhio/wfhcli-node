@@ -1,8 +1,8 @@
 {
   "name": "wfhcli",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A CLI wrapper around the WFH.io (https://www.wfh.io) remote job board",
-  "main": "index.js",
+  "main": "wfhlib.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,7 +24,6 @@
     "url": "https://github.com/wfhio/wfhcli-node/issues"
   },
   "homepage": "https://github.com/wfhio/wfhcli-node#readme",
-  "main": "wfhlib.js",
   "bin": {
     "wfhcli": "wfhcli.js"
   }
