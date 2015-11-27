@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 var program = require('commander');
 var wfhlib = require('./wfhlib.js');
 
@@ -25,7 +27,7 @@ program
 program
   .command('companies')
   .description('Display companies')
-  .option("-p, --page [id]", "Specify page to request")
+  .option('-p, --page [id]', 'Specify page to request')
   .action(function(options){
     var page = options.page || 1;
     wfhlib.makeRequest(site, '/api/companies.json?page=' + page, wfhlib.showCompanies)
@@ -41,20 +43,20 @@ program
 program
   .command('jobs')
   .description('Display jobs')
-  .option("-c, --category [id]", "Limit results by category")
-  .option("-p, --page [id]", "Specify page to request")
-  .option("-s, --source [id]", "Limit results to source")
+  .option('-c, --category [id]', 'Limit results by category')
+  .option('-p, --page [id]', 'Specify page to request')
+  .option('-s, --source [id]', 'Limit results to source')
   .action(function(options){
     var category = options.category || undefined;
     var page = options.page || 1;
     var source = options.source || undefined;
     var uri = '/api/jobs.json?page=' + page;
 
-    if (category != undefined) {
+    if (category !== undefined) {
       uri = uri + '&category_id=' + category;
     }
 
-    if (source != undefined) {
+    if (source !== undefined) {
       uri = uri + '&source_id=' + source;
     }
 
@@ -72,7 +74,7 @@ program
   .command('*', '', {noHelp: true})
   .action(function(env){
     program.outputHelp();
-})
+  })
 
 if (!process.argv.slice(2).length) {
   program.outputHelp()

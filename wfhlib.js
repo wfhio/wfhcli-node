@@ -1,3 +1,5 @@
+'use strict';
+
 var marked = require('marked');
 var moment = require('moment');
 var request = require('request');
@@ -14,7 +16,7 @@ var displayId = function(id) {
 };
 
 var getCountry = function(country) {
-  if (country != undefined) {
+  if (country !== undefined) {
     return country.name;
   }
   return 'Anywhere';
@@ -23,7 +25,7 @@ var getCountry = function(country) {
 var getTable = function(header) {
   var table = new Table({
     head: header,
-    style : {compact : true},
+    style: {compact: true}
   });
 
   return table;
@@ -35,7 +37,7 @@ var getUrl = function(site, uri) {
 
 var makeRequest = function(site, uri, callback) {
   request(getUrl(site, uri), function(error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error && response.statusCode === 200) {
       callback(body)
     }
   })
@@ -45,7 +47,7 @@ var showCategories = function(body) {
   var table = getTable(['ID', 'Name']);
   var json = JSON.parse(body);
 
-  for (var i=0; i<json.length; i++) {
+  for (var i = 0; i < json.length; i++) {
     table.push([json[i].id, json[i].name])
   }
   console.log(table.toString())
@@ -55,14 +57,14 @@ var showCompanies = function(body) {
   var table = getTable(['ID', 'Name']);
   var json = JSON.parse(body);
 
-  for (var i=0; i<json.length; i++) {
+  for (var i = 0; i < json.length; i++) {
     table.push([json[i].id, json[i].name])
   }
   console.log(table.toString())
 }
 
 var showCompany = function(body) {
-  var table = new Table({colWidths:[20,80], wordWrap:true});
+  var table = new Table({colWidths: [20, 80], wordWrap: true});
   var json = JSON.parse(body);
 
   table.push(
@@ -80,7 +82,7 @@ var showJobs = function(body) {
   var table = getTable(['ID', 'Posted', 'Category', 'Company', 'Title', 'Country']);
   var json = JSON.parse(body);
 
-  for (var i=0; i<json.length; i++) {
+  for (var i = 0; i < json.length; i++) {
     var date = moment(json[i].created_at).format('YYYY-MM-DD');
     table.push([json[i].id,
                date,
@@ -94,7 +96,7 @@ var showJobs = function(body) {
 }
 
 var showJob = function(body) {
-  var table = new Table({colWidths:[20,80], wordWrap:true});
+  var table = new Table({colWidths: [20, 80], wordWrap: true});
   var json = JSON.parse(body);
   var date = moment(json.created_at).format('YYYY-MM-DD HH:mm');
 
@@ -106,7 +108,7 @@ var showJob = function(body) {
     { 'Application Info': marked(json.application_info) },
     { 'Country': getCountry(json.country) }
   )
-  if (json.location != "") {
+  if (json.location !== '') {
     table.push({ 'Location': json.location })
   }
   table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) })
@@ -117,7 +119,7 @@ var showSources = function(body) {
   var table = getTable(['ID', 'Name', 'URL']);
   var json = JSON.parse(body);
 
-  for (var i=0; i<json.length; i++) {
+  for (var i = 0; i < json.length; i++) {
     table.push([json[i].id, json[i].name, json[i].url])
   }
   console.log(table.toString())
