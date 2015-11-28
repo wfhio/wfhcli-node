@@ -37,8 +37,16 @@ var getUrl = function(site, uri) {
 
 var makeRequest = function(site, uri, callback) {
   request(getUrl(site, uri), function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      callback(body)
+    if (!error) {
+      if (response.statusCode === 200) {
+        callback(body)
+      } else {
+        console.log('Oopsies, we got a ' + response.statusCode + ' from: ' + uri)
+        process.exit(1);
+      }
+    } else {
+      console.log('Oopsies, we got an error: ' + error)
+      process.exit(1);
     }
   })
 };

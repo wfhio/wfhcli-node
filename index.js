@@ -13,14 +13,14 @@ program
 program
   .command('categories')
   .description('Display job categories')
-  .action(function(){
+  .action(function() {
     wfhlib.makeRequest(site, '/api/categories.json', wfhlib.showCategories)
   })
 
 program
   .command('company [id]')
   .description('Display company with id')
-  .action(function(id){
+  .action(function(id) {
     wfhlib.makeRequest(site, '/api/companies/' + id + '.json', wfhlib.showCompany)
   })
 
@@ -28,7 +28,7 @@ program
   .command('companies')
   .description('Display companies')
   .option('-p, --page [id]', 'Specify page to request')
-  .action(function(options){
+  .action(function(options) {
     var page = options.page || 1;
     wfhlib.makeRequest(site, '/api/companies.json?page=' + page, wfhlib.showCompanies)
   })
@@ -36,7 +36,7 @@ program
 program
   .command('job [id]')
   .description('Display job with id')
-  .action(function(id){
+  .action(function(id) {
     wfhlib.makeRequest(site, '/api/jobs/' + id + '.json', wfhlib.showJob)
   })
 
@@ -46,7 +46,7 @@ program
   .option('-c, --category [id]', 'Limit results by category')
   .option('-p, --page [id]', 'Specify page to request')
   .option('-s, --source [id]', 'Limit results to source')
-  .action(function(options){
+  .action(function(options) {
     var category = options.category || undefined;
     var page = options.page || 1;
     var source = options.source || undefined;
@@ -72,7 +72,7 @@ program
 
 program
   .command('*', '', {noHelp: true})
-  .action(function(env){
+  .action(function(env) {
     program.outputHelp();
   })
 
