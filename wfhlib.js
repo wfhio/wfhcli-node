@@ -39,16 +39,16 @@ var makeRequest = function(site, uri, callback) {
   request(getUrl(site, uri), function(error, response, body) {
     if (!error) {
       if (response.statusCode === 200) {
-        callback(body)
+        callback(body);
       } else {
-        console.log('Oopsies, we got a ' + response.statusCode + ' from: ' + uri)
+        console.log('Oopsies, we got a ' + response.statusCode + ' from: ' + uri);
         process.exit(1);
       }
     } else {
-      console.log('Oopsies, we got an error: ' + error)
+      console.log('Oopsies, we got an error: ' + error);
       process.exit(1);
     }
-  })
+  });
 };
 
 var showCategories = function(body) {
@@ -56,20 +56,20 @@ var showCategories = function(body) {
   var json = JSON.parse(body);
 
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name])
+    table.push([json[i].id, json[i].name]);
   }
-  console.log(table.toString())
-}
+  console.log(table.toString());
+};
 
 var showCompanies = function(body) {
   var table = getTable(['ID', 'Name']);
   var json = JSON.parse(body);
 
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name])
+    table.push([json[i].id, json[i].name]);
   }
-  console.log(table.toString())
-}
+  console.log(table.toString());
+};
 
 var showCompany = function(body) {
   var table = new Table({colWidths: [20, 80], wordWrap: true});
@@ -78,13 +78,13 @@ var showCompany = function(body) {
   table.push(
     { 'Name': json.name },
     { 'URL': json.url }
-  )
+  );
   if (json.hasOwnProperty('country')) {
-    table.push({ 'Headquarters': json.country.name })
+    table.push({ 'Headquarters': json.country.name });
   }
-  table.push({ 'Twitter': json.twitter })
-  console.log(table.toString())
-}
+  table.push({ 'Twitter': json.twitter });
+  console.log(table.toString());
+};
 
 var showJobs = function(body) {
   var table = getTable(['ID', 'Posted', 'Category', 'Company', 'Title', 'Country']);
@@ -97,11 +97,11 @@ var showJobs = function(body) {
                json[i].category.name + ' ' + displayId(json[i].category.id),
                json[i].company.name + ' ' + displayId(json[i].company.id),
                json[i].title,
-               getCountry(json[i].country)])
+               getCountry(json[i].country)]);
   }
 
-  console.log(table.toString())
-}
+  console.log(table.toString());
+};
 
 var showJob = function(body) {
   var table = new Table({colWidths: [20, 80], wordWrap: true});
@@ -115,22 +115,22 @@ var showJob = function(body) {
     { 'Description': marked(json.description) },
     { 'Application Info': marked(json.application_info) },
     { 'Country': getCountry(json.country) }
-  )
+  );
   if (json.location !== '') {
-    table.push({ 'Location': json.location })
-  }
-  table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) })
-  console.log(table.toString())
-}
+    table.push({ 'Location': json.location });
+  };
+  table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) });
+  console.log(table.toString());
+};
 
 var showSources = function(body) {
   var table = getTable(['ID', 'Name', 'URL']);
   var json = JSON.parse(body);
 
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name, json[i].url])
+    table.push([json[i].id, json[i].name, json[i].url]);
   }
-  console.log(table.toString())
+  console.log(table.toString());
 };
 
 module.exports = {
@@ -145,5 +145,4 @@ module.exports = {
   showJobs: showJobs,
   showJob: showJob,
   showSources: showSources
-}
-
+};

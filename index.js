@@ -8,21 +8,21 @@ var wfhlib = require('./wfhlib.js');
 var site = 'https://www.wfh.io';
 
 program
-  .version('0.0.3')
+  .version('0.0.3');
 
 program
   .command('categories')
   .description('Display job categories')
   .action(function() {
-    wfhlib.makeRequest(site, '/api/categories.json', wfhlib.showCategories)
-  })
+    wfhlib.makeRequest(site, '/api/categories.json', wfhlib.showCategories);
+  });
 
 program
   .command('company [id]')
   .description('Display company with id')
   .action(function(id) {
-    wfhlib.makeRequest(site, '/api/companies/' + id + '.json', wfhlib.showCompany)
-  })
+    wfhlib.makeRequest(site, '/api/companies/' + id + '.json', wfhlib.showCompany);
+  });
 
 program
   .command('companies')
@@ -30,15 +30,15 @@ program
   .option('-p, --page [id]', 'Specify page to request')
   .action(function(options) {
     var page = options.page || 1;
-    wfhlib.makeRequest(site, '/api/companies.json?page=' + page, wfhlib.showCompanies)
-  })
+    wfhlib.makeRequest(site, '/api/companies.json?page=' + page, wfhlib.showCompanies);
+  });
 
 program
   .command('job [id]')
   .description('Display job with id')
   .action(function(id) {
-    wfhlib.makeRequest(site, '/api/jobs/' + id + '.json', wfhlib.showJob)
-  })
+    wfhlib.makeRequest(site, '/api/jobs/' + id + '.json', wfhlib.showJob);
+  });
 
 program
   .command('jobs')
@@ -60,24 +60,24 @@ program
       uri = uri + '&source_id=' + source;
     }
 
-    wfhlib.makeRequest(site, uri, wfhlib.showJobs)
-  })
+    wfhlib.makeRequest(site, uri, wfhlib.showJobs);
+  });
 
 program
   .command('sources')
   .description('Display job sources')
   .action(function() {
-    wfhlib.makeRequest(site, '/api/sources.json', wfhlib.showSources)
-  })
+    wfhlib.makeRequest(site, '/api/sources.json', wfhlib.showSources);
+  });
 
 program
   .command('*', '', {noHelp: true})
   .action(function(env) {
     program.outputHelp();
-  })
+  });
 
 if (!process.argv.slice(2).length) {
-  program.outputHelp()
+  program.outputHelp();
 }
 
-program.parse(process.argv)
+program.parse(process.argv);
