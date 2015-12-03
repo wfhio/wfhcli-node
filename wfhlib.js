@@ -33,8 +33,12 @@ var horiTable = function(data) {
     style: {compact: true}
   });
 
-  for (var i = 1; i < data.length; i++) {
-    table.push(data[i]);
+  if (data.length > 1) {
+    for (var i = 1; i < data.length; i++) {
+      table.push(data[i]);
+    }
+  } else {
+    table.push([ { colSpan: data[0].length, content: 'Oopsies, no results found' } ]);
   }
 
   return table.toString();
