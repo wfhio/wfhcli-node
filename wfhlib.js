@@ -1,5 +1,6 @@
 'use strict';
 
+var colors = require('colors/safe');
 var marked = require('marked');
 var moment = require('moment');
 var request = require('request');
@@ -22,17 +23,21 @@ var getCountry = function(country) {
   return 'Anywhere';
 };
 
-var getTable = function(header) {
+var getUrl = function(site, uri) {
+  return site + uri;
+};
+
+var horiTable = function(data) {
   var table = new Table({
-    head: header,
+    head: data[0],
     style: {compact: true}
   });
 
-  return table;
-};
+  for (var i = 1; i < data.length; i++) {
+    table.push(data[i]);
+  }
 
-var getUrl = function(site, uri) {
-  return site + uri;
+  return table.toString();
 };
 
 var makeRequest = function(site, uri, callback) {
@@ -52,97 +57,123 @@ var makeRequest = function(site, uri, callback) {
 };
 
 var showCategories = function(body) {
-  var table = getTable(['ID', 'Name']);
+  var data = [];
   var json = JSON.parse(body);
 
+  data.push(['ID', 'Name']);
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name]);
+    data.push([json[i].id, json[i].name]);
   }
-  console.log(table.toString());
+
+  console.log(horiTable(data));
 };
 
 var showCompanies = function(body) {
-  var table = getTable(['ID', 'Name']);
+  var data = [];
   var json = JSON.parse(body);
 
+  data.push(['ID', 'Name']);
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name]);
+    data.push([json[i].id, json[i].name]);
   }
-  console.log(table.toString());
+
+  console.log(horiTable(data));
 };
 
 var showCompany = function(body) {
-  var table = new Table({colWidths: [20, 80], wordWrap: true});
+  var data = [];
   var json = JSON.parse(body);
 
-  table.push(
-    { 'Name': json.name },
-    { 'URL': json.url }
+  data.push(
+    ['Name', json.name],
+    ['URL', json.url]
   );
   if (json.hasOwnProperty('country')) {
-    table.push({ 'Headquarters': json.country.name });
+    data.push(['Headquarters', json.country.name]);
   }
-  table.push({ 'Twitter': json.twitter });
-  console.log(table.toString());
+  data.push(['Twitter', json.twitter]);
+
+  console.log(vertTable(data));
 };
 
 var showJobs = function(body) {
-  var table = getTable(['ID', 'Posted', 'Category', 'Company', 'Title', 'Country']);
+  var data = [];
   var json = JSON.parse(body);
 
+  data.push(['ID', 'Posted', 'Category', 'Company', 'Title', 'Country']);
   for (var i = 0; i < json.length; i++) {
     var date = moment(json[i].created_at).format('YYYY-MM-DD');
-    table.push([json[i].id,
-               date,
-               json[i].category.name + ' ' + displayId(json[i].category.id),
-               json[i].company.name + ' ' + displayId(json[i].company.id),
-               json[i].title,
-               getCountry(json[i].country)]);
+    data.push(
+      [
+        json[i].id,
+        date,
+        json[i].category.name + ' ' + displayId(json[i].category.id),
+        json[i].company.name + ' ' + displayId(json[i].company.id),
+        json[i].title,
+        getCountry(json[i].country)
+      ]
+    );
   }
 
-  console.log(table.toString());
+  console.log(horiTable(data));
 };
 
 var showJob = function(body) {
-  var table = new Table({colWidths: [20, 80], wordWrap: true});
+  var data = [];
   var json = JSON.parse(body);
   var date = moment(json.created_at).format('YYYY-MM-DD HH:mm');
 
-  table.push(
-    { 'Title': json.title + ' @ ' + json.company.name + ' ' + displayId(json.company.id) },
-    { 'Category': json.category.name + ' ' + displayId(json.category.id) },
-    { 'Posted': date },
-    { 'Description': marked(json.description) },
-    { 'Application Info': marked(json.application_info) },
-    { 'Country': getCountry(json.country) }
+  data.push(
+    ['Title', json.title + ' @ ' + json.company.name + ' ' + displayId(json.company.id)],
+    ['Category', json.category.name + ' ' + displayId(json.category.id)],
+    ['Posted', date],
+    ['Description', marked(json.description)],
+    ['Application Info', marked(json.application_info)],
+    ['Country', getCountry(json.country)]
   );
   if (json.location !== '') {
-    table.push({ 'Location': json.location });
+    data.push(['Location', json.location]);
   };
-  table.push({ 'Source': json.source.name + ' ' + displayId(json.source.id) });
-  console.log(table.toString());
+  data.push(['Source', json.source.name + ' ' + displayId(json.source.id)]);
+
+  console.log(vertTable(data));
 };
 
 var showSources = function(body) {
-  var table = getTable(['ID', 'Name', 'URL']);
+  var data = [];
   var json = JSON.parse(body);
 
   for (var i = 0; i < json.length; i++) {
-    table.push([json[i].id, json[i].name, json[i].url]);
+    data.push([json[i].id, json[i].name, json[i].url]);
   }
-  console.log(table.toString());
+
+  console.log(horiTable(data));
+};
+
+// A vertical table doesn't create headers in the left-most column, so we use
+// a standard horizontal table but set the colour of the left-most values to
+// red.
+var vertTable = function(data) {
+  var table = new Table({colWidths: [20, 80], wordWrap: true});
+
+  for (var i = 0; i < data.length; i++) {
+    table.push([colors.red(data[i][0]), data[i][1]]);
+  }
+
+  return table.toString();
 };
 
 module.exports = {
   displayId: displayId,
   getCountry: getCountry,
-  getTable: getTable,
   getUrl: getUrl,
+  horiTable: horiTable,
   makeRequest: makeRequest,
   showCategories: showCategories,
   showCompanies: showCompanies,
   showCompany: showCompany,
   showJobs: showJobs,
   showJob: showJob,
-  showSources: showSources
+  showSources: showSources,
+  vertTable: vertTable
 };
