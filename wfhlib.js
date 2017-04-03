@@ -147,6 +147,7 @@ var showSources = function(body) {
   var data = [];
   var json = JSON.parse(body);
 
+  data.push(['ID', 'Name', 'URL']);
   for (var i = 0; i < json.length; i++) {
     data.push([json[i].id, json[i].name, json[i].url]);
   }
