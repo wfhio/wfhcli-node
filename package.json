@@ -1,6 +1,6 @@
 {
   "name": "wfhcli",
-  "version": "0.3.0",
+  "version": "3.1.0",
   "description": "A CLI wrapper around the WFH.io (https://www.wfh.io) remote job board",
   "main": "wfhlib.js",
   "scripts": {
