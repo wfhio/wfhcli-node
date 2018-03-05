@@ -1,19 +1,19 @@
 {
   "name": "wfhcli",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "A CLI wrapper around the WFH.io (https://www.wfh.io) remote job board",
   "main": "wfhlib.js",
   "scripts": {
     "test": "node test.js && eslint ."
   },
   "dependencies": {
-    "colors": "~1.1.2",
     "cli-table2": "~0.2.0",
-    "commander": "~2.9.0",
-    "marked": "~0.3.6",
+    "colors": "~1.1.2",
+    "commander": "~2.14.1",
+    "marked": "~0.3.17",
     "marked-terminal": "~2.0.0",
-    "moment": "~2.18.1",
-    "request": "~2.81.0"
+    "moment": "~2.21.0",
+    "request": "~2.83.0"
   },
   "repository": {
     "type": "git",
