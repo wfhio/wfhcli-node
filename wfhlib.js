@@ -4,7 +4,7 @@ var colors = require('colors/safe');
 var marked = require('marked');
 var moment = require('moment');
 var request = require('request');
-var Table = require('cli-table2');
+var Table = require('cli-table3');
 var TerminalRenderer = require('marked-terminal');
 
 marked.setOptions({
